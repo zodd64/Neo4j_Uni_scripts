@@ -1,0 +1,96 @@
+//1
+
+CREATE CONSTRAINT ON(p:Person)
+ASSERT p.username IS UNIQUE;
+
+CREATE (manos:Person{
+    username:"manosk",
+    firstName:"Manos",
+    lastName:"Koutoulakis",
+    sex:"male", 
+    city:"Heraklion",
+    nationality:"Greece"
+});
+CREATE (george:Person{
+    username:"georget",
+    firstName:"George",
+    lastName:"Testakis",
+    sex:"male", 
+    city:"Heraklion",
+    nationality:"Greece"
+});
+
+//2
+
+MATCH (manos:Person {username:"manosk"}), (george:Person {username:"georget"})
+CREATE (manos)-[r:IS_FRIEND {since:date("2019-05-02")}]->(george);
+
+MATCH (manos:Person {username:"manosk"}), (george:Person {username:"georget"})
+CREATE (george)-[r:IS_FRIEND {since:date("2019-05-02")}]->(manos);
+
+//3
+
+CREATE CONSTRAINT ON(m:Message)
+ASSERT m.messageID IS UNIQUE;
+
+MATCH (manos:Person {username:"manosk"})
+CREATE (manos)<-[r:POSTED_BY {message_date: "2021-03-03 13:00"}]-(m1:Message{
+    messageID:1,
+    messageContent:"Please prepare the lab computers"
+});
+MATCH (george:Person {username:"georget"})
+CREATE (george)<-[r:POSTED_BY {message_date: "2021-03-03 13:01"}]-(m2:Message{
+    messageID:2,
+    messageContent:"Any problems should be sent to me by email"
+});
+MATCH (george:Person {username:"georget"})
+CREATE (george)<-[r:POSTED_BY {message_date: "2021-03-03 13:05"}]-(m3:Message{
+    messageID:3,
+    messageContent:"Students should use code 1234 to access neo4j"
+});
+
+//4
+
+MATCH (george:Person {username:"georget"})
+CREATE (george)<-[r:COMMENTED_BY {comment_date: "2021-03-03 18:10"}]-(c1:Comments{
+    commentID:1,
+    commentContent:"I have already installed neo4j on all computers."
+});
+MATCH (m:Message{messageID:1}),(c:Comments{commentID:1})
+CREATE (m)<-[r:REPLIES_TO {comment_date: "2021-03-03 18:10"}]-(c);
+MATCH (manos:Person{username:"manosk"}), (c:Comments{commentID:1})
+CREATE (manos)<-[r:HAS_BEEN_COMMENTED {comment_date: "2021-03-03 18:10"}]-(c);
+
+MATCH (manos:Person {username:"manosk"})
+CREATE (manos)<-[r:COMMENTED_BY {comment_date: "2021-03-03 18:10"}]-(c2:Comments{
+    commentID:2,
+    commentContent:"Fine, I hope everything goes well this semester."
+});
+MATCH (m:Message{messageID:1}),(c:Comments{commentID:2})
+CREATE (m)<-[r:REPLIES_TO {comment_date: "2021-03-03 18:10"}]-(c);
+MATCH (manos:Person{username:"manosk"}), (c:Comments{commentID:2})
+CREATE (manos)<-[r:HAS_BEEN_COMMENTED {comment_date: "2021-03-03 18:10"}]-(c);
+
+MATCH (george:Person {username:"georget"})
+CREATE (george)<-[r:COMMENTED_BY {comment_date: "2021-03-03 18:10"}]-(c3:Comments{
+    commentID:3,
+    commentContent:"Update, password for login to Neo4j has changed. Use 4321 to access the database."
+});
+MATCH (m:Message{messageID:3}),(c:Comments{commentID:3})
+CREATE (m)<-[r:REPLIES_TO {comment_date: "2021-03-03 18:10"}]-(c);
+
+MATCH (george:Person{username:"georget"}), (c:Comments{commentID:3})
+CREATE (george)<-[r:HAS_BEEN_COMMENTED {comment_date: "2021-03-03 18:10"}]-(c);
+
+//5
+
+MATCH (george:Person{username:"georget"}), (m:Message{messageID:1})
+CREATE (george)-[r:LIKES]->(m);
+
+MATCH (george:Person{username:"manosk"}), (m:Message{messageID:1})
+CREATE (george)-[r:LIKES]->(m);
+
+MATCH (george:Person{username:"georget"}), (m:Message{messageID:2})
+CREATE (george)-[r:LIKES]->(m);
+
+

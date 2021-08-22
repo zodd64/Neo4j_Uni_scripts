@@ -1,0 +1,19 @@
+//1
+MATCH (c:Customer)-[:MADE]->(o:Order) 
+WITH c, count(o) as cnt WHERE cnt=2 
+RETURN c.fullName as CustomerName, cnt as SumOfOrders;
+//2
+MATCH (o:Order)
+SET o.requiredDate=date(o.requiredDate),o.orderDate=date(o.orderDate),o.shippedDate=date(o.shippedDate);
+//3
+MATCH (o:Order)
+WHERE o.orderDate = date({year: 2021, month: 7, day: 8})
+RETURN o;
+//4
+MATCH (p:Product{productName:"Apple MacBook PRO 2020"})-[r:PART_OF]->(c:Category{categoryName:"Smartphones"}) 
+DELETE r;
+MATCH (p:Product), (c:Category) 
+WHERE p.productName="Apple MacBook PRO 2020" AND c.categoryName="Laptops"
+CREATE (p)-[r:PART_OF]->(c);
+
+
